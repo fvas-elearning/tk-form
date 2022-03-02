@@ -41,8 +41,7 @@ class Form extends Form\Element
 
     const METHOD_POST               = 'post';
     const METHOD_GET                = 'get';
-
-
+    
 
     /**
      * @var string
@@ -222,6 +221,7 @@ class Form extends Form\Element
 
         if ($request instanceof \Symfony\Component\HttpFoundation\Request)
             $request = $request->request->all();
+
         $this->initForm();      // TODO: not sure if this is a better place for it or not???
 
         // Load default field values
@@ -236,7 +236,10 @@ class Form extends Form\Element
         // get the triggered event, this also setup the form ready to fire an event if present.
         /* @var Event\Iface|null $event */
         $event = $this->getTriggeredEvent($request);
-        if (!$this->isSubmitted()) return;
+        if (!$this->isSubmitted()) {
+            $this->executeFields();
+            return;
+        }
 
         // Load request field values
         $cleanRequest = $this->cleanLoadArray($request);
@@ -247,6 +250,7 @@ class Form extends Form\Element
             $this->getDispatcher()->dispatch(FormEvents::FORM_LOAD_REQUEST, $e);
         }
         $this->loadFields();
+        $this->executeFields();
 
         if ($this->getDispatcher()) {
             $e = new FormEvent($this);
@@ -256,6 +260,9 @@ class Form extends Form\Element
 
         if ($event) {
             $event->execute();
+//            if ($event->getRedirect()) {
+//                \Tk\Uri::create($event->getRedirect())->redirect();
+//            }
         }
     }
 
@@ -270,14 +277,42 @@ class Form extends Form\Element
     protected function loadFields($array = array())
     {
         $array = array_merge($this->loadArray, $array);
-
         /* @var $field Iface */
         foreach ($this->getFieldList() as $field) {
             if ($field instanceof Event\Iface) continue;
             $field->load($array);
         }
-
         return $this;
+    }
+
+    /**
+     * This is called only after new data loaded into the fields
+     *
+     * @return $this
+     */
+    protected function executeFields()
+    {
+        /* @var $field Iface */
+        foreach ($this->getFieldList() as $field) {
+            if ($field instanceof Event\Iface) continue;
+            $field->execute();
+        }
+        return $this;
+    }
+
+    /**
+     * Return all submit/button event fields
+     *
+     * @return Event\Iface[]|array
+     */
+    protected function getEventFields()
+    {
+        $list = [];
+        /* @var $field Iface */
+        foreach ($this->getFieldList() as $field) {
+            if ($field instanceof Event\Iface) $list[] = $field;
+        }
+        return $list;
     }
 
     /**
@@ -618,7 +653,7 @@ class Form extends Form\Element
         $fieldName = str_replace('[]', '', $fieldName);
         $field = $this->getField($fieldName);
         if (!$field || !$field instanceof Iface) {
-            throw new Exception('Type not found: `' . $fieldName . '`');
+            throw new Exception('Form Field not found: `' . $fieldName . '`');
         }
         $field->setValue($value);
         return $field;

@@ -207,7 +207,7 @@ class FieldGroup extends \Dom\Renderer\Renderer implements \Dom\Renderer\Display
                 $template->addCss('form-group', 'required');
                 $template->setAttr('label', 'title', 'Required');
             }
-            $template->appendHtml('label', $label);
+            $template->appendHtml('label', htmlentities($label));
             $template->setAttr('label', 'for', $this->getField()->getAttr('id'));
             $template->setVisible('label');
         }

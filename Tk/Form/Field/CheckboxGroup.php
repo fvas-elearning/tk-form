@@ -20,6 +20,23 @@ class CheckboxGroup extends Select
         $this->setArrayField(true);
     }
     
+//    /**
+//     * Compare a value and see if it is selected.
+//     *
+//     * @param string $val
+//     * @return bool
+//     */
+//    public function isSelected($val = '')
+//    {
+//        $value = $this->getValue();
+//        if (is_array($value) ) {
+//            if (in_array($val, $value)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
     /**
      * Compare a value and see if it is selected.
      *
@@ -33,6 +50,8 @@ class CheckboxGroup extends Select
             if (in_array($val, $value)) {
                 return true;
             }
+        } else if ($value !== null && $value == $val) {
+            return true;
         }
         return false;
     }
@@ -49,6 +68,11 @@ class CheckboxGroup extends Select
         /* @var \Tk\Form\Field\Option $option */
         foreach($this->getOptions() as $i => $option) {
             $tOpt = $template->getRepeat('option');
+
+            if ($this->getOnShowOption()->isCallable()) {
+                $b = $this->getOnShowOption()->execute($tOpt, $option, 'element');
+                if ($b === false) return $template;
+            }
 
             if ($option->hasAttr('disabled')) {
                 $tOpt->setAttr('option', 'disabled', 'disabled');

@@ -129,33 +129,30 @@ class Button extends Iface
      */
     public function show()
     {
-        $t = $this->getTemplate();
-        if ($t->isParsed()) return '';
-        if (!$t->keyExists('var', 'element')) {
-            return '';
-        }
-        if($t->getVar('element')->nodeName == 'button') {
-            $t->setAttr('element', 'type', $this->getType());
-            $t->setAttr('element', 'name', $this->getEventName());
-        }
-        $t->setAttr('element', 'value', $this->getEventName());
+        $template = $this->getTemplate();
+        if (!$template->isParsed() && $template->keyExists('var', 'element')) {
+            if ($template->getVar('element')->nodeName == 'button') {
+                $template->setAttr('element', 'type', $this->getType());
+                $template->setAttr('element', 'name', $this->getEventName());
+            }
+            $template->setAttr('element', 'value', $this->getEventName());
 
-        $t->setAttr('element', $this->getAttrList());
-        $t->addCss('element', $this->getCssList());
-        $t->insertText('text', $this->getLabel());
+            $template->setAttr('element', $this->getAttrList());
+            $template->addCss('element', $this->getCssList());
+            $template->insertText('text', $this->getLabel());
 
-        if ($this->getIcon()) {
-            $t->setVisible('iconL');
-            $t->addCss('iconL', $this->getIcon());
+            if ($this->getIcon()) {
+                $template->setVisible('iconL');
+                $template->addCss('iconL', $this->getIcon());
+            }
+
+            if ($this->getIconRight()) {
+                $template->setVisible('iconR');
+                $template->addCss('iconR', $this->getIconRight());
+            }
         }
-
-        if ($this->getIconRight()) {
-            $t->setVisible('iconR');
-            $t->addCss('iconR', $this->getIconRight());
-        }
-
         
-        return $t;
+        return $template;
     }
 
     /**

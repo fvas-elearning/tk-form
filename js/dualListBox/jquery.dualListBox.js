@@ -19,6 +19,10 @@
  */
 
 (function($) {
+
+  // TODO: remove this once I find a fix.
+  return;
+
   /** Initializes the DualListBox code as jQuery plugin. */
   $.fn.DualListBox = function(paramOptions, selected) {
     return this.each(function () {

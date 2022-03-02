@@ -73,10 +73,13 @@
 
       group.find('button').on('click', function () {
         $(this).blur();
-        if (!group.find('input').attr('readonly')) return;
-        //if (confirm('Are you sure you want to edit this field?')) {
+        if (group.find('input').attr('readonly')) {
+          //if (confirm('Are you sure you want to edit this field?')) {
+          group.find('button .fa').removeClass(plugin.settings.lockIcon).addClass(plugin.settings.unlockIcon);
           group.find('input').removeAttr('readonly');
-        //}
+          //}
+        }
+
       });
 
       $element.on('change', function () {
@@ -92,10 +95,10 @@
      */
     var updateInput = function(group) {
       if (group.find('input').val()) {
-        group.find('button i').removeClass(plugin.settings.unlockIcon).addClass(plugin.settings.lockIcon);
+        group.find('button .fa').removeClass(plugin.settings.unlockIcon).addClass(plugin.settings.lockIcon);
         group.find('input').attr('readonly', 'readonly');
       } else {
-        group.find('button i').removeClass(plugin.settings.lockIcon).addClass(plugin.settings.unlockIcon);
+        group.find('button .fa').removeClass(plugin.settings.lockIcon).addClass(plugin.settings.unlockIcon);
         group.find('input').removeAttr('readonly');
       }
     };

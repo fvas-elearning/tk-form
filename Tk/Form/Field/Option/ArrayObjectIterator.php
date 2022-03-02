@@ -149,10 +149,10 @@ class ArrayObjectIterator extends ArrayIterator
 
         if ( is_callable($this->textParam) ) {
             $text = call_user_func_array($this->textParam, array($obj));
-        } else if (property_exists($obj, $this->textParam)) {
-            $text = $pre . $obj->{$this->textParam} . $app;
         } else if ($method && method_exists($obj, $method) && is_string($obj->$method())) {
             $text = $pre . $obj->$method() . $app;
+        } else if (property_exists($obj, $this->textParam)) {
+            $text = $pre . $obj->{$this->textParam} . $app;
         }
 
         $option = Option::create($text, $value);

@@ -17,15 +17,15 @@ class MinMax extends Iface
     /**
      * __construct
      *
-     * @param string $nameMin
-     * @param string $nameMax
+     * @param string $age
+     * @param string $ageM
      * @throws \Tk\Form\Exception
      */
-    public function __construct($nameMin, $nameMax)
+    public function __construct($age, $ageM)
     {
-        parent::__construct($nameMin);
-        $this->maxName = $nameMax;
-        $this->setLabel(ucwords($nameMin) . '/' . ucwords($nameMax));
+        parent::__construct($age);
+        $this->maxName = $ageM;
+        $this->setLabel(ucwords($age) . '/' . ucwords($ageM));
     }
 
 

@@ -49,6 +49,9 @@
     // plugin vars
     var defaults = {
       gmapSelector: '.tk-gmap-select',
+      toggleBtnSelector: '.btn-toggle',
+      defaultMode: 'auto',
+      manualBtn: false,
       markerIcon: null,
       fieldNames: {
         address: 'address',
@@ -65,7 +68,34 @@
         updateAddress: 'Do you wish to update the address fields to this new location?'
       },
 
-      onFoo: function () {
+      onUpdateMode: function (plugin) {
+        if ($(this).data('editMode') === 'auto') {
+          $.each(fields, function () {
+
+            if (
+              $(this).is('[name=address]') ||
+              $(this).is('[name=mapLat]') ||
+              $(this).is('[name=mapLng]') ||
+              $(this).is('[name=mapZoom]')
+            ) return;
+            var parent = $(this).closest('.form-group');
+            parent.hide();
+          });
+          form.find('[name='+plugin.settings.fieldNames[0]+']').show();
+        } else {
+          $.each(fields, function () {
+            if (
+              $(this).is('[name=address]') ||
+              $(this).is('[name=mapLat]') ||
+              $(this).is('[name=mapLng]') ||
+              $(this).is('[name=mapZoom]')
+            ) return;
+            var parent = $(this).closest('.form-group');
+            parent.show();
+          });
+          //form.find('[name='+plugin.settings.fieldNames[0]+']').show();
+        }
+
       }
     };
     var $element = $(element);
@@ -86,8 +116,29 @@
         var name = plugin.settings.fieldNames[fieldName];
         fields[fieldName] = form.find('[name='+name+']');
         if (!fields[fieldName].length) {
-          console.log('The address auto-complete functions will not work unless all fields are available.');
+          console.warn('The address auto-complete functions will not work unless all fields are available.');
         }
+      }
+
+      if (plugin.settings.manualBtn) {
+        $element.data('editMode', plugin.settings.defaultMode);
+        // Bind the manual edit toggle button
+        $element.parent().find(plugin.settings.toggleBtnSelector).on('click', function () {
+          var input = $(this).closest('.form-group').find('input.form-control');
+          if (input.data('editMode') === 'auto') {
+            input.data('editMode', 'manual');
+          } else {
+            input.data('editMode', 'auto');
+          }
+          updateFieldMode();
+        });
+
+        // hide address fields by default excecpt the "address" field itself
+        // 'auto' use google and hide fields, 'manual' use all address fields
+        updateFieldMode();
+      } else {
+        $element.parent().find(plugin.settings.toggleBtnSelector).parent().hide();
+        $element.parent().removeClass('input-group input-append').addClass('form-group');
       }
 
       if ($element.attr('data-marker-icon') !== undefined && plugin.settings.markerIcon === null) {
@@ -113,8 +164,10 @@
         if (place.geometry) {
           fields.lat.val(place.geometry.location.lat());
           fields.lng.val(place.geometry.location.lng());
-          gmapSelect.data('gmapSelect').setLatLng(place.geometry.location.lat(), place.geometry.location.lng());
-          gmapSelect.data('gmapSelect').redraw();
+          if (gmapSelect != undefined) {
+            gmapSelect.data('gmapSelect').setLatLng(place.geometry.location.lat(), place.geometry.location.lng());
+            gmapSelect.data('gmapSelect').redraw();
+          }
         }
       });
 
@@ -136,32 +189,39 @@
         //el.closest('.form-row').hide();   // Can remove the submit buttons (See student Change Request in EMS)
       });
 
-      var gmapSelect = form.find(plugin.settings.gmapSelector + ' .tk-gmap-canvas').gmapSelect({
-        lat: parseFloat(fields.lat.val()),
-        lng: parseFloat(fields.lng.val()),
-        zoom: parseFloat(fields.zoom.val()),
-        icon: plugin.settings.markerIcon,
-        onChange: function (lat, lng, zoom) {
-          fields.zoom.val(zoom);
-        },
-        onSelect: function(lat, lng, zoom) {
-          if (fields['address'].val() === '' || confirm(plugin.settings.lang.updateAddress)) {
-            fields.lat.val(lat);
-            fields.lng.val(lng);
+      var canvas = form.find(plugin.settings.gmapSelector + ' .tk-gmap-canvas');
+      if (canvas.gmapSelect != undefined) {
+        var gmapSelect = canvas.gmapSelect({
+          lat: parseFloat(fields.lat.val()),
+          lng: parseFloat(fields.lng.val()),
+          zoom: parseFloat(fields.zoom.val()),
+          icon: plugin.settings.markerIcon,
+          onChange: function (lat, lng, zoom) {
             fields.zoom.val(zoom);
+          },
+          onSelect: function (lat, lng, zoom) {
+            if (fields['address'].val() === '' || confirm(plugin.settings.lang.updateAddress)) {
+              fields.lat.val(lat);
+              fields.lng.val(lng);
+              fields.zoom.val(zoom);
 
-            var geo = new google.maps.Geocoder();
-            geo.geocode({'location': {lat: lat, lng: lng}}, function(results, status) {
-              if (status === 'OK' && results[0]) updateAddressFields(results[0]);
-            });
-          } else {
-            return false;
+              var geo = new google.maps.Geocoder();
+              geo.geocode({'location': {lat: lat, lng: lng}}, function (results, status) {
+                if (status === 'OK' && results[0]) updateAddressFields(results[0]);
+              });
+            } else {
+              return false;
+            }
           }
-        }
-      });
+        });
+      }
 
     };  // END init()
 
+    // Toggle manual/auto mode
+    function updateFieldMode() {
+      plugin.settings.onUpdateMode.apply(element, [plugin]);
+    }
 
 
     // update the address fields with the place data

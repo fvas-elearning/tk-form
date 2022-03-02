@@ -3,6 +3,8 @@ namespace Tk\Form\Field;
 
 use Tk\Form\Exception;
 use Tk\Form;
+use Tk\Request;
+use Tk\Ui\Css;
 
 /**
  *
@@ -49,11 +51,16 @@ abstract class Iface extends \Tk\Form\Element
      * @var string
      */
     protected $fieldset = '';
-        
+
     /**
-     * @var string
+     * @var Css
      */
-    protected $fieldsetCss = '';
+    protected $fieldsetCss = null;
+
+    /**
+     * @var Css
+     */
+    protected $formGroupCss = null;
 
     /**
      * @var string
@@ -72,6 +79,8 @@ abstract class Iface extends \Tk\Form\Element
     public function __construct($name)
     {
         $this->setName($name);
+        $this->fieldsetCss = new Css();
+        $this->formGroupCss = new Css();
     }
 
     /**
@@ -152,6 +161,14 @@ abstract class Iface extends \Tk\Form\Element
     }
 
     /**
+     * This is called only once the form has been submitted
+     *   and new data loaded into the fields
+     *
+     * @param Request|array $request
+     */
+    public function execute() { }
+
+    /**
      * Set the field value.
      * Set the exact value the field requires to function.
      *
@@ -201,7 +218,6 @@ abstract class Iface extends \Tk\Form\Element
         return $this;
     }
 
-
     /**
      * Add a CSS Class name to the node
      *
@@ -225,7 +241,6 @@ abstract class Iface extends \Tk\Form\Element
     {
         return parent::removeCss($class, $fixName);
     }
-
 
     /**
      * test if the array is sequential or associative
@@ -251,7 +266,9 @@ abstract class Iface extends \Tk\Form\Element
      */
     public function getFieldsetCss()
     {
-        return $this->fieldsetCss;
+        if (!$this->fieldsetCss)
+            $this->fieldsetCss = new Css();
+        return $this->fieldsetCss->getCssString();
     }
 
     /**
@@ -262,8 +279,33 @@ abstract class Iface extends \Tk\Form\Element
     public function setFieldset($fieldset, $css = '')
     {
         $this->fieldset = $fieldset;
-        if ($css)
-            $this->fieldsetCss = $css;
+        if ($css) {
+            if (!$this->fieldsetCss)
+                $this->fieldsetCss = new Css();
+            $this->fieldsetCss->addCss($css);
+        }
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormGroupCss()
+    {
+        if (!$this->formGroupCss)
+            $this->formGroupCss = new Css();
+        return $this->formGroupCss->getCssString();
+    }
+
+    /**
+     * @param string $css
+     * @return $this
+     */
+    public function addFormGroupCss($css = '')
+    {
+        if (!$this->formGroupCss)
+            $this->formGroupCss = new Css();
+        $this->formGroupCss->addCss($css);
         return $this;
     }
 
@@ -284,8 +326,6 @@ abstract class Iface extends \Tk\Form\Element
         $this->tabGroup = $tabGroup;
         return $this;
     }
-
-
 
 
     /**
@@ -349,9 +389,11 @@ abstract class Iface extends \Tk\Form\Element
     public function setRequired($required = true)
     {
         if ($required) {
-            if (!$this->getForm() || $this->getForm()->isEnableRequiredAttr()) {
+            // TODO: Check this does not affect anything significant, as I want to remove all form
+            //       references in cases that the field is rendered without a form
+            //if (!$this->getForm() || $this->getForm()->isEnableRequiredAttr()) {
                 $this->setAttr('required');
-            }
+            //}
             $this->setAttr('data-required', 'required');
         } else {
             $this->removeAttr('required');
@@ -398,9 +440,13 @@ abstract class Iface extends \Tk\Form\Element
         // Field name attribute
         $template->setAttr($var, 'name', $this->getFieldName());
 
-        if ($this->isRequired() && !$this->getForm() && $this->getForm()->isEnableRequiredAttr()) {
-            $this->setRequired(false);
-        }
+        // TODO: I have removed this as this should not be an automatic option
+        //       Remove this once we can confirm this works without issue
+        //       I am not sure why this exists, but looks like it is for a specific case
+        //       At any rate when the form = null we cannot call isEnableRequiredAttr()
+//        if ($this->isRequired() && !$this->getForm() && $this->getForm()->isEnableRequiredAttr()) {
+//            $this->setRequired(false);
+//        }
 
         // Add attributes
         $template->setAttr($var, $this->getAttrList());
@@ -416,10 +462,12 @@ abstract class Iface extends \Tk\Form\Element
      * Set a new template for this renderer.
      *
      * @param \Dom\Template|string $template
+     * @return Iface
      */
     public function setTemplate($template)
     {
         $this->template = $template;
+        return $this;
     }
 
     /**

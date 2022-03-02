@@ -44,7 +44,9 @@ class Input extends Iface
      */
     public function getValue()
     {
-        return trim(parent::getValue());
+        if (is_string(parent::getValue()))
+            $this->setValue(trim(parent::getValue()));
+        return parent::getValue();
     }
     
     /**

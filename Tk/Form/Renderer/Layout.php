@@ -57,9 +57,10 @@ class Layout
     /**
      * @param string $fieldName
      * @param string $colCss
+     * @param string $rowCss
      * @return LayoutCol
      */
-    public function addRow($fieldName, $colCss = '')
+    public function addRow($fieldName, $colCss = '', $rowCss = '')
     {
         $col = $this->makeCol($fieldName);
         $col->addCss($colCss);
@@ -70,9 +71,10 @@ class Layout
     /**
      * @param string $fieldName
      * @param string $colCss
+     * @param string $rowCss
      * @return LayoutCol
      */
-    public function removeRow($fieldName, $colCss = '')
+    public function removeRow($fieldName, $colCss = '', $rowCss = '')
     {
         $col = $this->makeCol($fieldName);
         $col->addCss($colCss);

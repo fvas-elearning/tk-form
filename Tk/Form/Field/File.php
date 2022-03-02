@@ -72,9 +72,10 @@ class File extends Input
         }
         $this->destPath = rtrim($destPath, '/');
 
-        if ($this->isArrayField()) {
-            $this->setAttr('multiple', 'multiple');
-        }
+        // Add manually setAttr('multiple, 'multiple)....
+//        if ($this->isArrayField()) {
+//            $this->setAttr('multiple', 'multiple');
+//        }
     }
 
     /**
@@ -86,7 +87,7 @@ class File extends Input
      */
     public static function create($name, $destPath = null, $dataPath = null)
     {
-        return new static($name);
+        return new static($name, $destPath, $dataPath);
     }
 
     /**
@@ -435,7 +436,7 @@ class File extends Input
     {
         $xhtml = <<<HTML
 <div class="tk-file-control">
-  <input type="text" class="form-control" var="element"/>
+  <input type="text" class="form-control form-control-lg" var="element"/>
   <div class="tk-file-delete" choice="delete" var="delWrapper">
     <input type="checkbox" class="" var="delete" id="file-del"/> <label for="file-del" var="label"> Delete File</label>
   </div>

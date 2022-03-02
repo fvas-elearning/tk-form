@@ -19,6 +19,12 @@ class Select extends Iface
      */
     protected $onShowOption = null;
 
+    /**
+     * If true then
+     * @var bool
+     */
+    protected $strict = false;
+
 
     /**
      * @param string $name
@@ -134,7 +140,25 @@ class Select extends Iface
     }
 
     /**
-     *  function ($template, $option, $var) { }
+     * @return bool
+     */
+    public function isStrict(): bool
+    {
+        return $this->strict;
+    }
+
+    /**
+     * @param bool $strict
+     * @return $this
+     */
+    public function setStrict(bool $strict)
+    {
+        $this->strict = $strict;
+        return $this;
+    }
+
+    /**
+     *  function (\Dom\Template $template, \Tk\Form\Field\Option $option, $var) { }
      *
      * @param callable $callable
      * @param int $priority
@@ -148,7 +172,7 @@ class Select extends Iface
 
     /**
      * Eg:
-     *  function ($template, $option, $var) { }
+     *  function (\Dom\Template $template, \Tk\Form\Field\Option $option, $var) { }
      *
      * @param callable|null $onShowOption
      * @return Select
@@ -176,8 +200,14 @@ class Select extends Iface
                 if (in_array($val, $value))
                     return true;
             } else {
-                if ($value == $val)
-                    return true;
+                if ($this->isStrict()) {
+                    $val = (string)$val;
+                    if ($value === $val)
+                        return true;
+                } else {
+                    if ($value == $val)
+                        return true;
+                }
             }
         }
         return false;
@@ -200,6 +230,7 @@ class Select extends Iface
         $template->setAttr($var, 'value', $option->getValue());
         if ($this->isSelected($option->getValue())) {
             $template->setAttr($var, 'selected', 'selected');
+            $template->addCss($var, 'selected');
         }
 
         // Add attributes

@@ -3,6 +3,7 @@ namespace Tk\Form\Event;
 
 use Tk\Callback;
 use Tk\Form\Field;
+use Tk\Request;
 
 /**
  * @author Michael Mifsud <info@tropotek.com>

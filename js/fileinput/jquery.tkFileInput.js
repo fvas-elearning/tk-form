@@ -402,7 +402,7 @@
     var defaults = {
       dataUrl: '',
       enableDelete: false,
-      multipleSelect: null,
+      multipleSelect: null,   // deprecated
       serverConfirm: 'Are you sure you want to delete this file from the server?',
       localConfirm: '',
       cloneid: 0,
@@ -426,8 +426,6 @@
           plugin.settings.multipleSelect = ($(this).attr('name').indexOf('[]') > -1);
         }
 
-        //if (!plugin.settings.multipleSelect)
-        $(this).removeAttr('multiple');
         plugin.settings.template.find('.tfi-input-filename').remove();
         plugin.settings.template.find('.tfi-btn-input i').after('<span class="tfi-label">Select Files</span>');
       },

@@ -10,6 +10,7 @@ use Tk\Form;
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
+ * @deprecated Use the new Renderer\DomRenderer this should no longer be used.
  */
 class Dom extends Iface
 {
@@ -163,7 +164,7 @@ class Dom extends Iface
         foreach ($tabGroups as $gname => $group) {
             $tabBox = $t->getRepeat('tabBox');
             if (!$tabBox)
-                throw new \Tk\Exception('No tabBox repeat available: `' . $gname . '`. Check tou have not double parsed the template.');
+                throw new \Tk\Exception('No tabBox repeat available: `' . $gname . '`. Check you have not double parsed the template.');
             foreach ($group as $field) {
                 $tabBox->setAttr('tabBox', 'id', $this->form->getId().$this->cleanName($gname));
                 $tabBox->setAttr('tabBox', 'data-name', $gname);
@@ -226,7 +227,11 @@ class Dom extends Iface
         /* @var $field Field\Iface */
         foreach ($fieldList as $name => $field) {
             $setName = $field->getFieldset();
-            if (!isset($sets[$setName])) $sets[$setName] = array();
+            if (!$setName) {
+                $sets[][$name] = $field;
+                continue;
+            }
+            if ($setName && !isset($sets[$setName])) $sets[$setName] = array();
             $sets[$setName][$name] = $field;
         }
         $grouped = array();
@@ -241,13 +246,12 @@ class Dom extends Iface
     /**
      * @param Field\Iface $field
      * @param Template $t
-     * @param string $var
+     * @param string $var ???? Not being used???
      */
     protected function showField(Field\Iface $field, Template $t, $var = 'fields')
     {
         if ($field instanceof Event\Iface || $field instanceof Field\Hidden) {
             $html = $field->show();
-            /* @var Event\Iface $field */
             if ($html instanceof \Dom\Template) {
                 $t->appendTemplate('events', $html);
             } else {
@@ -267,6 +271,8 @@ class Dom extends Iface
 
             if (!$this->getLayout()) {
                 $formRow = $t->getRepeat('form-row');
+                $formRow->addCss('form-row', 'tk-'.\Tk\ObjectUtil::basename($field) . '-row');
+                $formRow->addCss('form-row', 'tk-'.$field->getId() . '-row');
                 if ($html instanceof \Dom\Template) {
                     $formRow->appendTemplate('form-row', $html);
                 } else {
@@ -281,6 +287,8 @@ class Dom extends Iface
                 }
                 if (!$this->formRow || $layoutCol->isRowEnabled()) {
                     $this->formRow = $t->getRepeat('form-row');
+                    $this->formRow ->addCss('form-row', 'tk-'.lcfirst(\Tk\ObjectUtil::basename($field)) . '-row');
+                    $this->formRow ->addCss('form-row', 'tk-'.$field->getId() . '-row');
                 }
 
                 if ($html instanceof \Dom\Template) {
@@ -314,7 +322,7 @@ class Dom extends Iface
       <div class="formTabs" var="tabs" choice="tabs">
         <div class="tab-content" var="tab-content">
 
-          <div var="tabBox" repeat="tabBox" class="tab-pane">
+          <div class="tab-pane" var="tabBox" repeat="tabBox">
             <fieldset var="fieldset" repeat="fieldset">
               <legend var="legend"></legend>
               <div class="form-row" var="form-row" repeat="form-row"></div>
@@ -329,8 +337,8 @@ class Dom extends Iface
         <legend var="legend"></legend>
           <div class="form-row" var="form-row" repeat="form-row"></div>
       </fieldset>
-
       <div class="form-row" var="form-row" repeat="form-row"></div>
+      
     </div>
 
     <div class="form-row tk-form-events clearfix" var="events"></div>

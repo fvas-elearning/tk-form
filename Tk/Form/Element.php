@@ -117,7 +117,7 @@ abstract class Element extends \Dom\Renderer\Renderer implements \Tk\InstanceKey
     }
 
     /**
-     * Callback: function ($template, $element) { }
+     * Callback: function (\Dom\Template $template, $element) { }
      *
      * @param callable $callable
      * @param int $priority
@@ -138,7 +138,7 @@ abstract class Element extends \Dom\Renderer\Renderer implements \Tk\InstanceKey
     }
 
     /**
-     * Callback: function ($fieldGroup, $element) { }
+     * Callback: function (\Dom\Template $fieldGroup, \Tk\Form\Renderer\FieldGroup $element) { }
      *
      * @param callable|null $onShowFieldGroup
      * @return static
